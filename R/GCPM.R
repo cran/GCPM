@@ -330,6 +330,7 @@ else if(this@link.function=="CM")
   W=this@W
 calc.rc=ifelse(is.finite(this@loss.thr),1,0)
 cat("Starting simulation (",this@N,"simulations )\n")
+set.seed(seed = ifelse(this@seed==0,as.integer(Sys.time()),max(round(this@seed),1)))
 ret=cpploss(default.distr.int,link.function.int,this@random.numbers[this@scenarios,][1:this@N,],Sigma,W,this@PD.disc,this@PL.disc,calc.rc,this@loss.thr,this@seed, this@max.entries)
 sim.losses=ret$simlosses
 if(sim.losses[length(sim.losses)]==-1)

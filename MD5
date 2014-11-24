@@ -1,8 +1,8 @@
-a552e1bbcbd65d5e8ff98b2286719874 *DESCRIPTION
+94ee05bb22cf8799cba4c991e0fb0d28 *DESCRIPTION
 ad34c440cd4fb85408ac13da10b26655 *NAMESPACE
-13260b18a89d587610ea080065e5f910 *R/GCPM.R
+57ccbc6e240dd62366c9925a47966623 *R/GCPM.R
 a983b55943ccfb7cf33eed061d46a112 *R/cpploss.R
-29f7ad575eb9a5e6568463734dfdbce6 *R/other_functions.R
+d382dc1273dfe203826c059118559f7b *R/other_functions.R
 2e9172dbd1ccae228dbdaa2c0763a916 *data/portfolio.pois.csv
 b31cceac958f308d114b0950dde55c5d *data/portfolio.pool.csv
 ede47ee0804a1cb39bdc0e7ce45e3170 *inst/include/cpploss.h
@@ -15,7 +15,7 @@ b85af609afe270f8dd5bd490ea080994 *man/EL.analyt-methods.Rd
 a8a06fe93e8879d3e3faafa5209a4672 *man/ES-methods.Rd
 c945ae38daccf9fb8dbf1d38b6a76cd9 *man/ES.cont-methods.Rd
 c2a2ba62443624ae64f5c0e7c80c4bee *man/GCPM-class.Rd
-917f44782ba5541516a2dceaa62f3c53 *man/GCPM-package.Rd
+fe1a5ad170436687aa70e01ebc1d610e *man/GCPM-package.Rd
 26e1c32959b635574a3965399b0d58cd *man/LGD-methods.Rd
 4faf6cbb79111ce26f804e4497801d43 *man/LHR-methods.Rd
 015e6ed550d725a730c59bb3fa330e7f *man/N-methods.Rd
@@ -56,5 +56,5 @@ e5fb5bc80b19b7b4ab0a4bae3d70d24c *man/sector.names-methods.Rd
 fe4abd1f57eef6aee2e19b42d1dd2ada *man/seed-methods.Rd
 7564f4c2fcc3d011803c36a472dc9539 *man/show-methods.Rd
 bc623f10cbc2f3777199bf19322edd83 *man/summary-methods.Rd
-92d0028a341126091e8765a4d1c619de *src/cpploss.cpp
+5328bda0e669e3d669a5dd9e473dfe05 *src/cpploss.cpp
 ede47ee0804a1cb39bdc0e7ce45e3170 *src/cpploss.h

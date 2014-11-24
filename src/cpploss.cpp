@@ -6,11 +6,7 @@
 #include "cpploss.h"
 #include <Rcpp.h>
 #include <math.h>
-#include "boost/math/distributions/normal.hpp" // for normal_distribution
-#include "boost/random/uniform_01.hpp"
-#include "boost/random/mersenne_twister.hpp"
-#include "boost/random/variate_generator.hpp"
-#include "boost/random/poisson_distribution.hpp"
+#include <Rmath.h>
 #include <iostream>  
 
 // [[Rcpp::export]]
@@ -44,16 +40,14 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
   double *CPlosses=new double[NCP];
   List ret;
   NumericVector simlosses(N),state(1);
+  double *DD=new double[NCP];
+  if(link_function(0)==2){
+    for(int i=0;i<NCP;i++)
+      DD[i]=R::qnorm(PD[i],0,1,1,0);
+  }
   
-  if(seed[0]==0)
-    seed(0)=std::time(0);
-  boost::random::mt19937 rng(seed(0));
-  boost::uniform_01<> uni;
-  boost::math::normal gauss(0,1);
-  Progress p((int)floor(N/print_every), true);
-  for(int i=0;i<1e6;i++) //draw 1mio numbers bevor using them
-    temp=uni(rng);
-    
+  GetRNGstate();
+  Progress p((int)floor(N/print_every), true);  
   if(link_function(0)==1){ //CRP
     for(int n=0;n<N;n++){
       if(n%print_every==0 && n>0){
@@ -66,7 +60,7 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
             condPD+=W(i,k+1)*S(n,k)*PD[i];
           if(default_distr(i)==1){ //Bernoulli
             condPD=std::min(1.0,std::max(0.0000001,condPD));
-            temp=uni(rng);
+            temp=unif_rand();
             if(temp<=condPD){
               CPlosses[i]=PL(i);
               simlosses(n)+=PL(i);
@@ -76,8 +70,8 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
           }
           else{ //Poisson
             condPD=std::max(0.0000001,condPD);
-            boost::poisson_distribution<int> poisdist(condPD);
-            defaults=poisdist(rng);
+            
+            defaults=(int)R::rpois(condPD);
             simlosses(n)+=PL(i)*defaults;
             CPlosses[i]=PL(i)*defaults;
           }
@@ -134,7 +128,7 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
       }
       if(!Progress::check_abort()){
         for(int i=0;i<NCP;i++){
-          temp=quantile(gauss,PD[i]);
+          temp=DD[i];
           for(int k=0;k<NS;k++){
             temp-=W(i,k)*S(n,k);
           }
@@ -143,10 +137,10 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
             for(int l=0;l<NS;l++)
               temp2+=W(i,k)*Sigma(k,l)*W(i,l);
           }
-          condPD=cdf(gauss,temp/sqrt(1-temp2));
+          condPD=R::pnorm(temp/sqrt(1-temp2),0,1,1,0);
           if(default_distr(i)==1){ //Bernoulli
             condPD=std::min(1.0,std::max(0.0000001,condPD));
-            temp=uni(rng);
+            temp=unif_rand();
             if(temp<=condPD){
               CPlosses[i]=PL(i);
               simlosses(n)+=PL(i);
@@ -156,8 +150,7 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
           }
           else{ //Poisson
             condPD=std::max(0.0000001,condPD);
-            boost::poisson_distribution<int> poisdist(condPD);
-            defaults=poisdist(rng);
+            defaults=(int)R::rpois(condPD);
             simlosses(n)+=PL(i)*defaults;
             CPlosses[i]=PL(i)*defaults; 
           }
@@ -207,6 +200,7 @@ SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigm
       }
     }
   }
+  PutRNGstate();
   p.increment();
 
   NumericMatrix CPsimlossesfinal(NCP,VaRszen);
