@@ -88,7 +88,7 @@ Objects can be created via the \code{init} function (see \code{\link{init}})
     \item{\code{LHR}:}{likelihood ration of sector drawing in case of a
     simulative model}
     \item{max.entries}{
-    numeric value defining the maximum number of counterparty losses stored to
+    numeric value defining the maximum number of loss scenarios stored to
     calculate risk contributions.}
     \item{\code{N}:}{number of simulations in case of a simulative model}
     \item{\code{scenarios}:}{scenarios (rows) of \code{random.numbers} used

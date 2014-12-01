@@ -1,7 +1,7 @@
 gcpm.round <- function(a){ifelse(a%%0.5==0&a%%1!=0&trunc(a)%%2==0,round(a,0)+1,round(a,0))}
 
 init <- function(model.type="CRP",link.function="CRP",N,seed=0,loss.unit,alpha.max=0.9999,
-                 loss.thr=Inf,sec.var,random.numbers=matrix(),LHR, max.entries=1e6){
+                 loss.thr=Inf,sec.var,random.numbers=matrix(),LHR, max.entries=1e3){
  
   packageStartupMessage("    Generalized Credit Portfolio Model \n    Copyright (C) 2014 Kevin Jakob & Dr. Matthias Fischer
 

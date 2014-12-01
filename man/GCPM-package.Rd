@@ -20,8 +20,8 @@ model sensitivities.
 \tabular{ll}{
 Package: \tab GCPM\cr
 Type: \tab Package\cr
-Version: \tab 1.1\cr
-Date: \tab 2014-11-24\cr
+Version: \tab 1.1.1\cr
+Date: \tab 2014-12-01\cr
 License: \tab GPL-2\cr
 }
 }

@@ -10,7 +10,7 @@ of the function are passed to the object after performing some plausibility chec
 \usage{
 init(model.type = "CRP", link.function = "CRP", N, seed = 0,
 loss.unit, alpha.max = 0.9999, loss.thr = Inf, sec.var,
-random.numbers = matrix(), LHR, max.entries=1e6)
+random.numbers = matrix(), LHR, max.entries=1e3)
 }
 \arguments{
   \item{model.type}{Character value, specifying the model type. One can choose
@@ -72,7 +72,7 @@ to be equally likely.  This parameter is used only if
 \code{model.type} == "simulative".
 }
 \item{max.entries}{
-numeric value defining the maximum number of counterparty losses stored to
+numeric value defining the maximum number of loss scenarios stored to
 calculate risk contributions.
 }
 }

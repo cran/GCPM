@@ -1,8 +1,8 @@
 Package: GCPM
 Type: Package
 Title: Generalized Credit Portfolio Model
-Version: 1.1
-Date: 2014-11-24
+Version: 1.1.1
+Date: 2014-12-01
 Author: Kevin Jakob
 Maintainer: Kevin Jakob <Kevin.Jakob@Student.uni-augsburg.de>
 Description: The package helps to analyze the default risk of credit portfolios. Commonly known models, 
@@ -17,7 +17,8 @@ Description: The package helps to analyze the default risk of credit portfolios.
 License: GPL-2
 Imports: Rcpp (>= 0.11.2), methods, RcppProgress(>= 0.1)
 LinkingTo: Rcpp, RcppProgress
-Packaged: 2014-11-24 18:46:01 UTC; Kevin_Jakob
+SystemRequirements: Windows, Linux, OS X
+Packaged: 2014-12-01 09:43:48 UTC; Kevin_Jakob
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2014-11-25 08:40:13
+Date/Publication: 2014-12-01 18:13:42

@@ -340,9 +340,7 @@ if(calc.rc){
   loss.szenarios=ret$lossszenarios
   this@CP.sim.losses=matrix(CP.sim.losses,ncol=ncol(CP.sim.losses),nrow=this@NC,dimnames=list(this@NR,loss.szenarios))
   if(loss.szenarios[length(loss.szenarios)]==-1){
-    warning("Number of loss scenarios times number of counterparties exceeded 
-            memory limit\n Increase loss.thr or max.entries.\n 
-            Risk contributions are not available.\n")
+    warning("Number of loss scenarios exceeded memory limit. Increase loss.thr or max.entries.\nRisk contributions are not available.\n")
     calc.rc=FALSE
   }
 }

@@ -1,8 +1,8 @@
-94ee05bb22cf8799cba4c991e0fb0d28 *DESCRIPTION
+9d7ac30343bfd3446748762d796131f3 *DESCRIPTION
 ad34c440cd4fb85408ac13da10b26655 *NAMESPACE
-57ccbc6e240dd62366c9925a47966623 *R/GCPM.R
-a983b55943ccfb7cf33eed061d46a112 *R/cpploss.R
-d382dc1273dfe203826c059118559f7b *R/other_functions.R
+2ac7b7699e7db0d2ead7fe65e024fb5d *R/GCPM.R
+1d899ec929b95c9b65125ae282b49506 *R/cpploss.R
+c48bb3bf615c730dad2eff0d970e3d31 *R/other_functions.R
 2e9172dbd1ccae228dbdaa2c0763a916 *data/portfolio.pois.csv
 b31cceac958f308d114b0950dde55c5d *data/portfolio.pool.csv
 ede47ee0804a1cb39bdc0e7ce45e3170 *inst/include/cpploss.h
@@ -14,8 +14,8 @@ f43fc50a7c89c9ce03e6c1cdf6e16909 *man/EL-methods.Rd
 b85af609afe270f8dd5bd490ea080994 *man/EL.analyt-methods.Rd
 a8a06fe93e8879d3e3faafa5209a4672 *man/ES-methods.Rd
 c945ae38daccf9fb8dbf1d38b6a76cd9 *man/ES.cont-methods.Rd
-c2a2ba62443624ae64f5c0e7c80c4bee *man/GCPM-class.Rd
-fe1a5ad170436687aa70e01ebc1d610e *man/GCPM-package.Rd
+6796e9dcf241f598c8a944d8273ea1ce *man/GCPM-class.Rd
+48b09c6194be054cc282110016ed1b42 *man/GCPM-package.Rd
 26e1c32959b635574a3965399b0d58cd *man/LGD-methods.Rd
 4faf6cbb79111ce26f804e4497801d43 *man/LHR-methods.Rd
 015e6ed550d725a730c59bb3fa330e7f *man/N-methods.Rd
@@ -40,7 +40,7 @@ dedd00f9a408ee4caedc18bc62130d6c *man/business-methods.Rd
 04493e5ff0b22143896f50eb5f5449a4 *man/default-methods.Rd
 40a528612d774694c9dfc175de807c90 *man/export-methods.Rd
 73f850d8e872ef96ebbaf9b0f1cd582e *man/idiosyncr-methods.Rd
-f5771867659e48ca7f7d8a196eace60b *man/init.Rd
+0b425493c15a7d66246d7818c57e8c9b *man/init.Rd
 cbba30a1294552dfc296937dec1bfd70 *man/link.function-methods.Rd
 4292b7e0f322d7d6efc70a24d1d19af7 *man/loss-methods.Rd
 7018226f7137eda1b829345cd211e4ab *man/loss.thr-methods.Rd
@@ -56,5 +56,5 @@ e5fb5bc80b19b7b4ab0a4bae3d70d24c *man/sector.names-methods.Rd
 fe4abd1f57eef6aee2e19b42d1dd2ada *man/seed-methods.Rd
 7564f4c2fcc3d011803c36a472dc9539 *man/show-methods.Rd
 bc623f10cbc2f3777199bf19322edd83 *man/summary-methods.Rd
-5328bda0e669e3d669a5dd9e473dfe05 *src/cpploss.cpp
+9b7c1452f806e8d7f9bee9900ad30edd *src/cpploss.cpp
 ede47ee0804a1cb39bdc0e7ce45e3170 *src/cpploss.h
