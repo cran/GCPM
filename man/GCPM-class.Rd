@@ -94,8 +94,8 @@ Objects can be created via the \code{init} function (see \code{\link{init}})
     \item{\code{scenarios}:}{scenarios (rows) of \code{random.numbers} used
     within the simulation of portfolio losses}
     \item{\code{seed}:}{parameter used to initialize the random number
-    generator. If \code{seed=0} a value based on current system time will
-    be used.}
+    generator. If \code{seed} is not provided a value based on current system 
+    time will be used.}
     \item{\code{loss.thr}:}{specifies a lower bound for portfolio losses to be
     stored in order to derive risk contributions on counterparty level. Using
     a lower value needs a lot of memory but will be necessary in order to

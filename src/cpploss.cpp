@@ -9,10 +9,10 @@
 #include <iostream>  
 
 // [[Rcpp::export]]
-SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigma_a, SEXP W_a, SEXP PD_a, SEXP PL_a, SEXP calc_rc_a, SEXP loss_thr_a,SEXP seed_a,SEXP max_entries_a){
+SEXP  GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigma_a, SEXP W_a, SEXP PD_a, SEXP PL_a, SEXP calc_rc_a, SEXP loss_thr_a, SEXP max_entries_a){
   
   NumericMatrix S(S_a), W(W_a),Sigma(Sigma_a);
-  NumericVector PD(PD_a), PL(PL_a),seed(seed_a),max_entries(max_entries_a),default_distr(default_distr_a),link_function(link_function_a),calc_rc(calc_rc_a),loss_thr(loss_thr_a);
+  NumericVector PD(PD_a), PL(PL_a),max_entries(max_entries_a),default_distr(default_distr_a),link_function(link_function_a),calc_rc(calc_rc_a),loss_thr(loss_thr_a);
   List ret;
   
   bool full=false;

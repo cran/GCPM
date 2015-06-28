@@ -20,8 +20,8 @@ model sensitivities.
 \tabular{ll}{
 Package: \tab GCPM\cr
 Type: \tab Package\cr
-Version: \tab 1.1.1\cr
-Date: \tab 2014-12-01\cr
+Version: \tab 1.2\cr
+Date: \tab 2015-06-26\cr
 License: \tab GPL-2\cr
 }
 }
@@ -72,7 +72,8 @@ random.numbers[,i]=rgamma(N,shape = 1/sec.var[i],scale=sec.var[i])}
 
 #create a portfolio model and analyze the portfolio
 TestModel=init(model.type = "simulative",link.function = "CRP",N = N,
-loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=1e6)
+loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=5e6,
+max.entries=2e4)
 TestModel=analyze(TestModel,portfolio)
 
 #plot of pdf of portfolio loss (in million) with indicators for EL, VaR and ES
@@ -86,5 +87,4 @@ ES=ES(TestModel,alpha)
 #Calculate risk contributions to VaR and ES 
 risk.cont=cbind(VaR.cont(TestModel,alpha = alpha),
 ES.cont(TestModel,alpha = alpha))
-
 }

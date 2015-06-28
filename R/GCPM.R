@@ -92,7 +92,7 @@ setMethod("read",c("GCPM","data.frame"),function(this,portfolio) {
 
 #portfolio data
 #####################################
-cat("Importing portfolio data....\n")
+message("Importing portfolio data....")
 this@NC=nrow(portfolio)
   if(is.null(portfolio$Number)){
     warning("The Number-column is missing in the portfolio\n")
@@ -149,11 +149,16 @@ this@NC=nrow(portfolio)
   else
     this@business=as.factor(portfolio$Business)
   temp=(do.call(cbind,portfolio))[,-(1:8)]
-
+  temp=as.matrix(temp)
+  if(ncol(temp)==1)
+    colnames(temp)=colnames(portfolio)[9]
   this@NS=ncol(temp)
   this@sector.names=as.factor(colnames(temp))
   #this@sector.names=this@sector.names[match(levels(this@sector.names),this@sector.names)]
   temp=temp[,match(this@sector.names,colnames(temp))]
+  temp=as.matrix(temp)
+  if(ncol(temp)==1)
+    colnames(temp)=colnames(portfolio)[9]
   if(is.null(temp)){
     stop("The sector-weights are missing in the portfolio.\n")
   }
@@ -171,7 +176,12 @@ this@NC=nrow(portfolio)
   noEAD=which(this@EAD==0)
   noLGD=which(this@LGD==0)
   noPD=which(this@PD<=0)
-  PD1=which(this@PD>=1 & this@default=="Bernoulli")
+  if(this@link.function=="CRP")
+    PD1=which(this@PD>=1 & this@default=="Bernoulli")
+  else if(this@link.function=="CM")
+    PD1=which(this@PD>=1)
+  else
+    stop("Wrong specification of link.function. Choose between CRP and CM.")
   emptyCP=union(noEAD,union(noLGD,union(noPD,PD1)))
   if(length(emptyCP)>0){
     this@NR=this@NR[-emptyCP]
@@ -185,8 +195,8 @@ this@NC=nrow(portfolio)
     this@NC=this@NC-length(emptyCP)
   }
   
-  cat(this@NS," sectors ...",sep="")
-  cat(this@NC," counterparties (",length(emptyCP)," removed due to EAD=0 (",length(noEAD),"), lgd=0 (",length(noLGD),"), pd<=0 (",length(noPD),") pd>=1 with Bernoulli distribution(",length(PD1),"))\n\n",sep="")
+  message(this@NS," sectors ...")
+  message(this@NC," counterparties (",length(emptyCP)," removed due to EAD=0 (",length(noEAD),"), lgd=0 (",length(noLGD),"), pd<=0 (",length(noPD),") pd>=1 (",length(PD1),"))\n")
   gc()
   return(this)
 }
@@ -222,9 +232,13 @@ setMethod(f="plausi",signature=c("GCPM"),definition=function(this){
       temp=which(!is.na(match(this@sector.names,levels(as.factor(colnames(this@random.numbers))))))
       if(length(temp)<this@NS)
         stop("Not all sectors names in the portfolio can be found as colnames for random numbers.")
+      else if(this@NS>1){
+        this@random.numbers=as.matrix(this@random.numbers[,temp])
+        this@random.numbers=as.matrix(this@random.numbers[,match(this@sector.names,colnames(this@random.numbers))])
+      }
       else{
-        this@random.numbers=this@random.numbers[,temp]
-        this@random.numbers=this@random.numbers[,match(this@sector.names,colnames(this@random.numbers))]
+        this@random.numbers=as.matrix(this@random.numbers[,temp])
+        colnames(this@random.numbers)=this@sector.names
       }
     }
   }
@@ -286,39 +300,37 @@ setMethod(f="calc.portfolio.statistics",signature=c("GCPM"),definition=function(
   this@PD.disc=this@PD*(this@PL/this@PL.disc)                                                                # transformed PD
   this@EL.analyt=sum(this@PL*this@PD)                                                                     # expected loss
   
-  cat("Portfolio statistics....\n")
-  cat("Loss unit: ",fo(this@loss.unit),"\n",sep="")  
-  cat("Portfolio EAD:",fo(sum(as.numeric(this@EAD))),"\n")
-  cat("Portfolio potential loss:",fo(sum(as.numeric(this@PL))),"\n")
-  cat("Portfolio expected loss:",fo(this@EL.analyt),"(analytical)\n")
+  message("Portfolio statistics....")
+  message("Loss unit: ",fo(this@loss.unit))  
+  message("Portfolio EAD:",fo(sum(as.numeric(this@EAD))))
+  message("Portfolio potential loss:",fo(sum(as.numeric(this@PL))))
+  message("Portfolio expected loss:",fo(this@EL.analyt),"(analytical)")
   
   if(this@model.type=="CRP"){
     SI=sector.info(this)
     this@SD.syst=sqrt(sum(this@sec.var*SI$loss*SI$loss))  			                                   # portfolio standard diviation
     this@SD.div=sqrt(sum(this@PL.disc^2*this@PD.disc))                                              # diversifible risk
     
-    cat("Diversifible risk: ",fo(this@SD.div),"  Systematic risk: ",fo(this@SD.syst),"\n")
+    message("Diversifible risk: ",fo(this@SD.div),"  Systematic risk: ",fo(this@SD.syst))
     this@SD.analyt=sqrt((this@SD.div)^2+(this@SD.syst)^2)
-    cat("Portfolio standad deviation:",fo(this@SD.analyt),"(analytical)\n")
+    message("Portfolio standad deviation:",fo(this@SD.analyt),"(analytical)")
   }
   gc()
 	return(this)
 }
 )
 
-setGeneric("loss.dist.sim",function(this) standardGeneric("loss.dist.sim"))
-setMethod(f="loss.dist.sim",signature=c("GCPM"),definition=function(this){
+setGeneric("loss.dist.sim",function(this,Ncores) standardGeneric("loss.dist.sim"))
+setMethod(f="loss.dist.sim",signature=c("GCPM","numeric"),definition=function(this,Ncores){
 
 LHR=(this@LHR[this@scenarios][1:this@N]/sum(this@LHR[this@scenarios][1:this@N]))[1:this@N]                                     #normalizing LHR to sum=1
 sim.losses=rep(0,this@N)
 
-if(this@seed==0)
-  seed=floor(1e6*runif(1))
-else
-  seed=this@seed
-
 #C++ simulation
-Sigma=cor(this@random.numbers[this@scenarios,])
+if(this@NS==1)
+  Sigma=matrix(1,1,1)
+else
+  Sigma=cor(this@random.numbers[this@scenarios,])
 default.distr.int=numeric(this@NC)
 for(i in 1:this@NC)
   default.distr.int[i]=which(this@default[i]==c("Bernoulli","Poisson"))
@@ -328,28 +340,87 @@ if(this@link.function=="CRP")
   W=cbind(this@idiosyncr,this@W)
 else if(this@link.function=="CM")
   W=this@W
+W=as.matrix(W)
 calc.rc=ifelse(is.finite(this@loss.thr),1,0)
-cat("Starting simulation (",this@N,"simulations )\n")
-set.seed(seed = ifelse(this@seed==0,as.integer(Sys.time()),max(round(this@seed),1)))
-ret=cpploss(default.distr.int,link.function.int,this@random.numbers[this@scenarios,][1:this@N,],Sigma,W,this@PD.disc,this@PL.disc,calc.rc,this@loss.thr,this@seed, this@max.entries)
-sim.losses=ret$simlosses
-if(sim.losses[length(sim.losses)]==-1)
-  stop("C++ simulation was terminated by the user\n")
-if(calc.rc){
-  CP.sim.losses=ret$CPsimlosses
-  loss.szenarios=ret$lossszenarios
-  this@CP.sim.losses=matrix(CP.sim.losses,ncol=ncol(CP.sim.losses),nrow=this@NC,dimnames=list(this@NR,loss.szenarios))
-  if(loss.szenarios[length(loss.szenarios)]==-1){
-    warning("Number of loss scenarios exceeded memory limit. Increase loss.thr or max.entries.\nRisk contributions are not available.\n")
-    calc.rc=FALSE
+message("Starting simulation (",this@N,"simulations )")
+
+Ncores=max(round(Ncores),1)
+if(Ncores>1){
+  if(Ncores>=detectCores()){
+    Ncores=detectCores()-1
+    warning("Ncores reduced to ", Ncores," due to system restrictions.")
+  }
+  message("Parallel computing on ",Ncores," cores (no progress bar)")
+  
+  do.tasks<-function(X,default.distr.int,link.function.int,random.numbers,Sigma,W,
+                     PD.disc,PL.disc,calc.rc,loss.thr,max.entries,Ncores,seed){
+    library(GCPM)
+    set.seed(seed = ifelse(is.na(seed),as.integer(Sys.time()),seed))
+    N=nrow(random.numbers)
+    start=end=rep(0,Ncores)
+    start[1]=1
+    end[1]=ceiling(N/Ncores)
+    for(i in 2:Ncores){
+      start[i]=end[i-1]+1
+      end[i]=start[i]+ceiling(N/Ncores)
+    }
+    end=pmin(end,N)
+    start=pmin(start,N)
+    ret=cpploss(default.distr.int,link.function.int,as.matrix(random.numbers[start[X]:end[X],]),
+                as.matrix(Sigma),as.matrix(W),PD.disc,PL.disc,calc.rc,loss.thr,max.entries)
+    return(ret)    
+  }
+  
+  cluster <- makeCluster(Ncores)
+  retPar=parLapplyLB(cluster,X = 1:Ncores,fun = do.tasks,default.distr.int,link.function.int,as.matrix(this@random.numbers[this@scenarios,]),as.matrix(Sigma),as.matrix(W),this@PD.disc,this@PL.disc,calc.rc,this@loss.thr,this@max.entries,Ncores,this@seed)
+  stopCluster(cluster)
+  
+  #merge simulated losses
+  sim.losses=retPar[[1]]$simlosses
+  if(calc.rc){
+    CP.sim.losses=retPar[[1]]$CPsimlosses
+    loss.szenarios=retPar[[1]]$lossszenarios
+  }
+  for(i in 2:Ncores){ 
+    if(calc.rc){
+      CP.sim.losses=cbind(CP.sim.losses,retPar[[i]]$CPsimlosses)
+      loss.szenarios=c(loss.szenarios,retPar[[i]]$lossszenarios+length(sim.losses))
+    }
+    sim.losses=c(sim.losses,retPar[[i]]$simlosses)
+  }  
+}
+else{ #single core
+  set.seed(seed = ifelse(is.na(this@seed),as.integer(Sys.time()),this@seed))
+  ret=cpploss(default.distr.int,link.function.int,as.matrix(this@random.numbers[this@scenarios,]),as.matrix(Sigma), as.matrix(W),this@PD.disc,this@PL.disc,calc.rc,this@loss.thr,this@max.entries)
+  sim.losses=ret$simlosses
+  
+  if(sim.losses[length(sim.losses)]==-1)
+    stop("C++ simulation was terminated by the user\n")
+  if(calc.rc){
+    CP.sim.losses=ret$CPsimlosses
+    loss.szenarios=ret$lossszenarios
   }
 }
 
+if(calc.rc){
+  if(length(loss.szenarios)>0){
+    if(any(loss.szenarios==-1)){
+      warning("Number of loss scenarios exceeded memory limit. Increase loss.thr or max.entries.\nRisk contributions are not available.\n")
+      calc.rc=FALSE
+    }
+  }
+  else{
+    warning("No loss scenarios stored because of too high value for loss.thr.\nRisk contributions are not available.\n")
+    calc.rc=FALSE
+  }
+}
 this@sim.losses=sim.losses
-cat("Simulation finished\n\n")
+if(calc.rc)
+  this@CP.sim.losses=matrix(CP.sim.losses,ncol=ncol(CP.sim.losses),nrow=this@NC,dimnames=list(this@NR,loss.szenarios))
+message("Simulation finished\n")
 gc()
 ##########################################
-cat("Calculating loss distribution...\n")
+message("Calculating loss distribution...")
 if(abs(this@loss.unit)>=1e-8){
   sim.losses=round(sim.losses/this@loss.unit)*this@loss.unit
   if(calc.rc)
@@ -384,7 +455,7 @@ setMethod(f="loss.dist.crp",signature=c("GCPM"),definition=function(this){
     warning("If model.type==CRP, only Poisson default distribution will be used")
     this@default=rep("Poisson",this@NC)
   }
-  cat("Calculate the loss distribution till ",this@alpha.max,"-confidence level is reached.",sep="","\n")  
+  message("Calculate the loss distribution till ",this@alpha.max,"-confidence level is reached.",sep="")  
   M=1e5 #max number of exposure bands
   A=matrix(0,ncol=M,nrow=this@NS)                                                           # Make all needed variables local to this 
   B=A                                                                                                # function instead of going up the environment 
@@ -420,7 +491,7 @@ setMethod(f="loss.dist.crp",signature=c("GCPM"),definition=function(this){
       j=j+1
     }
   }
-  else{                                                                                              # standard case
+  else{                                                                          # standard case
     for(k in 1:this@NS){
 	    A[k,1]=1+sigma.k[k]^2*mu.k[k]
 	    B[k,1]=-log(A[k,1])
@@ -430,13 +501,9 @@ setMethod(f="loss.dist.crp",signature=c("GCPM"),definition=function(this){
 	  CDF[1]=PDF[1]
 	
 	  j=0
+    pb=txtProgressBar(style = 3,min = 0.1)
 	  while(j<M && CDF[j+1]<this@alpha.max){
 		  j=j+1
-		  if(j%%1e3==0){
-  	    cat(" it=",j," CDF=",CDF[j],";")
-        if(j%%5e3==0)
-          cat("\n")
-		  }
       select=which(nu==j)
 		  for(k in 1:this@NS){
 		    if(length(select)>0)
@@ -450,8 +517,11 @@ setMethod(f="loss.dist.crp",signature=c("GCPM"),definition=function(this){
 		  a[j+1]=sum1+sum(B[,j+1]/(sigma.k[1:this@NS]^2))
       PDF[j+1]=sum((1:j)/j*a[2:(j+1)]*PDF[j:1])
 		  CDF[j+1]=CDF[j]+PDF[j+1]
+      if(j%%1e2==0){
+        setTxtProgressBar(pb,value = 10^(CDF[j+1]-this@alpha.max))
+      }
 	  }
-    cat("\n")
+    message("")
 	  this@PDF=PDF[1:(j+1)]
 	  this@CDF=CDF[1:(j+1)]
 	  this@a=a[1:(j+1)]
@@ -464,8 +534,8 @@ setMethod(f="loss.dist.crp",signature=c("GCPM"),definition=function(this){
 
   this@loss=(0:j)*this@loss.unit                                                                     # create losses
   this@alpha.max=this@CDF[length(this@CDF)]
-  cat("Calculation completed...\n")
-  cat("Reached level of confidence: ",this@alpha.max," ( iterations actually done: ",j," )\n\n",sep="")
+  message("Calculation completed...")
+  message("Reached level of confidence: ",this@alpha.max," ( iterations actually done: ",j," )\n")
   gc()
   return(this)        
 }
@@ -478,14 +548,14 @@ setMethod(f="measure",signature=c("GCPM","missing"),definition=function(this,alp
 
 setMethod(f="measure",signature=c("GCPM","numeric"),definition=function(this,alpha){
 
-  cat("Calculating risk measures from loss distribution....\n")        
+  message("Calculating risk measures from loss distribution....")        
   this@EL=sum(as.numeric(this@loss*this@PDF))                                                    # expected loss
-  cat("Expected loss from loss distribution: ",fo(this@EL)," (deviation from EL calculated from portfolio data: ",round(this@EL/this@EL.analyt-1,4)*100,"%)\n",sep="")  
+  message("Expected loss from loss distribution: ",fo(this@EL)," (deviation from EL calculated from portfolio data: ",round(this@EL/this@EL.analyt-1,4)*100,"%)")  
   alpha.EL=this@CDF[min(which(num.geq(this@loss,this@EL.analyt)))]
-  cat("Exceedance Probability of the expected loss:",1-alpha.EL,"\n")
-  cat("Portfolio mean expected loss exceedance: ",fo(ES(this,alpha.EL)),sep="","\n")
+  message("Exceedance Probability of the expected loss:",1-alpha.EL)
+  message("Portfolio mean expected loss exceedance: ",fo(ES(this,alpha.EL)))
   this@SD=sqrt(sum(as.numeric(this@PDF*(this@loss-this@EL)^2)))                              # standard deviation
-  cat("Portfolio loss standard deviation:",fo(this@SD),"\n\n")  
+  message("Portfolio loss standard deviation:",fo(this@SD),"\n")  
   
   if(any(alpha<=0 | alpha>=1))
     warning("Level alpha has to be in (0,1)")
@@ -519,9 +589,9 @@ setMethod(f="measure",signature=c("GCPM","numeric"),definition=function(this,alp
 		  warning(paste("Expected Shortfall (",alpha[i],") is not available, increase alpha.max",sep=""))
     
     #output
-		cat("Portfolio Economic Capital(",alpha[i],"): ",fo(EC[i]),sep="","\n")
-		cat("Portfolio Value-at-risk(",alpha[i],"): ",fo(VaR[i]),sep="","\n")
-		cat("Portfolio Expected Shortfall(",alpha[i],"): ",fo(ES[i]),sep="","\n\n")        
+		message("Portfolio Economic Capital(",alpha[i],"): ",fo(EC[i]))
+		message("Portfolio Value-at-risk(",alpha[i],"): ",fo(VaR[i]))
+		message("Portfolio Expected Shortfall(",alpha[i],"): ",fo(ES[i]),"\n")        
 	}  
   gc()
 	return(this)
@@ -698,11 +768,11 @@ setMethod("EC.VaR.ES.cont.single.sim",signature=c("GCPM","numeric","character"),
     }
     
     if(abs(dev.EC)>0.01 || abs(dev.VaR)>0.01){
-      cat("Deviation between VaR, EC contributions and VaR, EC caused by discontinuity of loss distribution:\n")
+      message("Deviation between VaR, EC contributions and VaR, EC caused by discontinuity of loss distribution:")
       if((type=="all" || type=="EC") && abs(dev.EC)>0.01)
-        cat("Sum-check (alpha = ",alpha," ) EC-cont: ",round((sum(EC.cont)-VaR(this,alpha)+this@EL.analyt)/(VaR(this,alpha)-this@EL.analyt)*100,2),"% deviation\n",sep="")                                                                                                                                                                  
+        message("Sum-check (alpha = ",alpha," ) EC-cont: ",round((sum(EC.cont)-VaR(this,alpha)+this@EL.analyt)/(VaR(this,alpha)-this@EL.analyt)*100,2),"% deviation")                                                                                                                                                                  
       if((type=="all" || type=="VaR") && abs(dev.VaR)>0.01)
-        cat("Sum-check (alpha = ",alpha," ) VaR-cont: ",round((sum(VaR.cont)-VaR(this,alpha))/VaR(this,alpha)*100,2),"% deviation \n",sep="")
+        message("Sum-check (alpha = ",alpha," ) VaR-cont: ",round((sum(VaR.cont)-VaR(this,alpha))/VaR(this,alpha)*100,2),"% deviation")
     }
   }
   temp=cbind(EC.cont,VaR.cont,ES.cont)
@@ -887,7 +957,7 @@ setMethod(f="export",signature=c("GCPM","character","character","numeric"),defin
   ret=list()
   temp=matrix(cbind(this@loss,this@PDF,this@CDF),nrow=length(this@CDF),ncol=3,dimnames=list(1:length(this@PDF),c("Loss","PDF","CDF")))
   if(!return.files){
-    cat("Exporting loss distribution...\n")
+    message("Exporting loss distribution...")
     file.name=paste(path.out,"lossdist.csv",sep="")
     dir.create(paste(path.out,sep=""),showWarnings=FALSE)
     if(file.format=="csv")
@@ -900,7 +970,7 @@ setMethod(f="export",signature=c("GCPM","character","character","numeric"),defin
     ret$loss.dist=temp
   
   if(!return.files){
-    cat("Writing summary file...\n")
+    message("Writing summary file...")
     this=write.summary(this,path.out,file.format)                                                                       # write input/output data to file
   }
   else
@@ -1073,12 +1143,18 @@ setMethod("search.tau",signature=c("GCPM","numeric"),definition=function(this,lo
   return(ret)
 })
 
-setGeneric("analyze",function(this,portfolio,alpha) standardGeneric("analyze"))
-setMethod(f="analyze",signature=c("GCPM","data.frame","missing"),definition=function(this,portfolio,alpha){
-  return(analyze(this,portfolio,numeric()))
+setGeneric("analyze",function(this,portfolio,alpha,Ncores) standardGeneric("analyze"))
+setMethod(f="analyze",signature=c("GCPM","data.frame","missing","missing"),definition=function(this,portfolio,alpha,Ncores){
+  return(analyze(this,portfolio,numeric(),1))
+})
+setMethod(f="analyze",signature=c("GCPM","data.frame","numeric","missing"),definition=function(this,portfolio,alpha,Ncores){
+  return(analyze(this,portfolio,alpha,1))
+})
+setMethod(f="analyze",signature=c("GCPM","data.frame","missing","numeric"),definition=function(this,portfolio,alpha,Ncores){
+  return(analyze(this,portfolio,numeric(),Ncores))
 })
 
-setMethod(f="analyze",signature=c("GCPM","data.frame","numeric"),definition=function(this,portfolio,alpha){
+setMethod(f="analyze",signature=c("GCPM","data.frame","numeric","numeric"),definition=function(this,portfolio,alpha,Ncores){
 
   if(any(alpha<=0 | alpha>=1))
     warning("Level alpha has to be in (0,1)")
@@ -1094,7 +1170,7 @@ setMethod(f="analyze",signature=c("GCPM","data.frame","numeric"),definition=func
   if(this@model.type=="CRP")
     this=loss.dist.crp(this)
   else if(this@model.type=="simulative")
-    this=loss.dist.sim(this)
+    this=loss.dist.sim(this,Ncores)
   else
     stop("Wrong speficification of model.type. Choose beween CRp and simulative.")
   this=measure(this,alpha)
@@ -1137,21 +1213,21 @@ setMethod(f="write.summary",signature=c("GCPM","character","character"),definiti
 setMethod("show", signature = "GCPM", definition = function(object){
 
   S=summary(object)
-  cat("Model type:",S$model.type,"\n")
-  cat("Link function:",S$link.function,"\n")  
-  cat("Number of counterparties:",S$NC,"\n")
-  cat("Number of sectors:",S$NS,"\n")
-  cat("Sum EAD:",fo(S$EAD),"\n")
-  cat("Sum PL:",fo(S$PL),"\n")  
-  cat("Expected loss:",fo(S$EL),"(loss distribution);",fo(S$EL.analyt),"(analytical)\n")
+  message("Model type: ",S$model.type)
+  message("Link function: ",S$link.function)  
+  message("Number of counterparties: ",S$NC)
+  message("Number of sectors: ",S$NS)
+  message("Sum EAD: ",fo(S$EAD))
+  message("Sum PL: ",fo(S$PL))  
+  message("Expected loss: ",fo(S$EL)," (loss distribution); ",fo(S$EL.analyt)," (analytical)")
   if(S$model.type=="CRP"){
-    cat("      SD loss:",fo(S$SD),"(loss distribution);",fo(S$SD.analyt),"(analytical)\n")
-    cat("Systematic SD:",fo(S$SD.syst),"; Diversifiable SD:",fo(S$SD.div),"\n")
+    message("      SD loss: ",fo(S$SD)," (loss distribution); ",fo(S$SD.analyt)," (analytical)")
+    message("Systematic SD: ",fo(S$SD.syst),"; Diversifiable SD:",fo(S$SD.div))
   }  
   else if(S$model.type=="simulative")
-    cat("      SD loss:",fo(S$SD),"(loss distribution);\n")
-  cat("Loss unit:",fo(S$loss.unit),"\n")
-  cat("Maximum level of CDF:",S$alpha.max,"\n")  
+    message("      SD loss: ",fo(S$SD)," (loss distribution);")
+  message("Loss unit: ",fo(S$loss.unit))
+  message("Maximum level of CDF: ",S$alpha.max)  
 })
 
 setGeneric("model.type",function(this) standardGeneric("model.type"))

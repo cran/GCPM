@@ -2,8 +2,10 @@
 \docType{methods}
 \alias{analyze-methods}
 \alias{analyze,GCPM-method}
-\alias{analyze,GCPM,data.frame,missing-method}
-\alias{analyze,GCPM,data.frame,numeric-method}
+\alias{analyze,GCPM,data.frame,missing,missing-method}
+\alias{analyze,GCPM,data.frame,numeric,missing-method}
+\alias{analyze,GCPM,data.frame,missing,numeric-method}
+\alias{analyze,GCPM,data.frame,numeric,numeric-method}
 \alias{analyze}
 
 \title{Analyze a Credit Portfolio}
@@ -14,7 +16,7 @@ positions, sum of EAD and PL or the expected loss are calculated. Afterwards the
 loss distribution is estimated according to \code{model.type}.
 }
 \usage{
-analyze(this,portfolio,alpha)
+analyze(this,portfolio,alpha,Ncores)
 }
 \arguments{
 \item{this}{object of class \code{GCPM}}
@@ -33,6 +35,8 @@ have to be defined (please be aware of the correct spelling of the column names)
   }
   \item{alpha}{loss levels for risk measures economic capital, value at risk
   and expected shortfall (optional)}
+  \item{Ncores}{number of (virtual) cores used to perfom Monte Carlo simulation 
+  (requires package \pkg{parallel}, default=1)}
 }
 \value{
 object of class \code{GCPM}.
@@ -109,7 +113,8 @@ random.numbers[,i]=rgamma(N,shape = 1/sec.var[i],scale=sec.var[i])}
 
 #create a portfolio model and analyze the portfolio
 TestModel=init(model.type = "simulative",link.function = "CRP",N = N,
-loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=1e6)
+loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=5e6,
+max.entries=2e4)
 TestModel=analyze(TestModel,portfolio)
 
 #plot of pdf of portfolio loss (in million) with indicators for EL, VaR and ES
@@ -124,4 +129,6 @@ ES=ES(TestModel,alpha)
 risk.cont=cbind(VaR.cont(TestModel,alpha = alpha),
 ES.cont(TestModel,alpha = alpha))
 
+#Use parallel computing for Monte Carlo simulation
+TestModel=analyze(TestModel,portfolio,Ncores=2)
 }

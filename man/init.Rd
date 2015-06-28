@@ -8,7 +8,7 @@ The function helps to create a new object of class \code{GCPM}. The arguments
 of the function are passed to the object after performing some plausibility checks.
 }
 \usage{
-init(model.type = "CRP", link.function = "CRP", N, seed = 0,
+init(model.type = "CRP", link.function = "CRP", N, seed,
 loss.unit, alpha.max = 0.9999, loss.thr = Inf, sec.var,
 random.numbers = matrix(), LHR, max.entries=1e3)
 }
@@ -35,9 +35,9 @@ scenarios provided via \code{random.numbers}, scenarios are reused.
 This parameter is used only if \code{model.type} == "simulative".
 }
   \item{seed}{
-numeric value used to initialize the random number generator. If \code{seed == 0}
-a value based on current system time will be used. This parameter is used only
-if \code{model.type} == "simulative".
+numeric value used to initialize the random number generator. If \code{seed} is 
+not provided a value based on current system time will be used. This parameter 
+is used only if \code{model.type} == "simulative".
 }
   \item{loss.unit}{
 numeric positive value used to discretize potential losses.
@@ -123,7 +123,8 @@ random.numbers[,i]=rgamma(N,shape = 1/sec.var[i],scale=sec.var[i])}
 
 #create a portfolio model and analyze the portfolio
 TestModel=init(model.type = "simulative",link.function = "CRP",N = N,
-loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=1e6)
+loss.unit = 1e3, random.numbers = random.numbers,LHR=rep(1,N),loss.thr=5e6,
+max.entries=2e4)
 TestModel=analyze(TestModel,portfolio)
 
 #plot of pdf of portfolio loss (in million) with indicators for EL, VaR and ES
@@ -137,6 +138,5 @@ ES=ES(TestModel,alpha)
 #Calculate risk contributions to VaR and ES 
 risk.cont=cbind(VaR.cont(TestModel,alpha = alpha),
 ES.cont(TestModel,alpha = alpha))
-
 }
 

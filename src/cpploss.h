@@ -11,7 +11,7 @@
  * by .Call. See the thread http://thread.gmane.org/gmane.comp.lang.r.rcpp/649/focus=672
  * on Rcpp-devel for a misuse of RcppExport
  */
-RcppExport SEXP GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigma_a, SEXP W_a, SEXP PD_a, SEXP PL_a, SEXP calc_rc_a, SEXP loss_thr_a,SEXP seed_a, SEXP max_entries_a);
+RcppExport SEXP GCPM_cpploss(SEXP default_distr_a,SEXP link_function_a, SEXP S_a,SEXP Sigma_a, SEXP W_a, SEXP PD_a, SEXP PL_a, SEXP calc_rc_a, SEXP loss_thr_a, SEXP max_entries_a);
 
 
 

@@ -1,9 +1,9 @@
 gcpm.round <- function(a){ifelse(a%%0.5==0&a%%1!=0&trunc(a)%%2==0,round(a,0)+1,round(a,0))}
 
-init <- function(model.type="CRP",link.function="CRP",N,seed=0,loss.unit,alpha.max=0.9999,
+init <- function(model.type="CRP",link.function="CRP",N,seed,loss.unit,alpha.max=0.9999,
                  loss.thr=Inf,sec.var,random.numbers=matrix(),LHR, max.entries=1e3){
  
-  packageStartupMessage("    Generalized Credit Portfolio Model \n    Copyright (C) 2014 Kevin Jakob & Dr. Matthias Fischer
+  packageStartupMessage("    Generalized Credit Portfolio Model \n    Copyright (C) 2015 Kevin Jakob & Dr. Matthias Fischer
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -21,14 +21,14 @@ init <- function(model.type="CRP",link.function="CRP",N,seed=0,loss.unit,alpha.m
   
   if(alpha.max<0 || alpha.max>1)
     stop("alpha.max is not between 0 and 1!")
-  if(loss.unit<=0)
-    stop("Loss.unit has to be positive!\n")
   if(missing(loss.unit)){
     if(model.type=="CRP")
-      loss.unit=1e6
+      stop("Please provide a suitable loss unit > 0.")
     else if(model.type=="simulative")
       loss.unit=1
   }
+  if(loss.unit<=0)
+    stop("Loss.unit has to be positive!\n")
   
   if(!any(model.type==c("CRP","simulative")))
     stop("Wrong specification of model.type! Choose between CRP or simulativ.")
@@ -44,8 +44,10 @@ init <- function(model.type="CRP",link.function="CRP",N,seed=0,loss.unit,alpha.m
   }
   if(model.type=="CRP" && missing(LHR))
     LHR=0
-  if(seed<0)
-    stop("seed can not be negative!")
+  if(missing(seed))
+    seed=NA
+  else
+    seed=as.integer(round(seed))
   if(model.type=="simulative" && missing(N))
     N=nrow(random.numbers)
   else if(missing(N))
@@ -78,7 +80,7 @@ init <- function(model.type="CRP",link.function="CRP",N,seed=0,loss.unit,alpha.m
   if(model.type=="CRP" && is.null(names(sec.var)))
     stop("No sector names given as names of sec.var")
   
-  return(new("GCPM",N=floor(N),link.function=link.function,loss.thr=loss.thr,seed=seed,
+  return(new("GCPM",N=floor(N),link.function=link.function,loss.thr=loss.thr,seed=as.numeric(seed),
              model.type=model.type,loss.unit=loss.unit,
              alpha.max=alpha.max,sec.var=sec.var,random.numbers=random.numbers,
              LHR=LHR,scenarios=scenarios,max.entries=max(0,floor(max.entries))))
