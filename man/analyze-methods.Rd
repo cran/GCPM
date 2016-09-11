@@ -35,7 +35,7 @@ have to be defined (please be aware of the correct spelling of the column names)
   }
   \item{alpha}{loss levels for risk measures economic capital, value at risk
   and expected shortfall (optional)}
-  \item{Ncores}{number of (virtual) cores used to perfom Monte Carlo simulation 
+  \item{Ncores}{number of (virtual) cores used to perfom Monte Carlo simulation
   (requires package \pkg{parallel}, default=1)}
 }
 \value{
@@ -48,7 +48,7 @@ model, the loss distribution is estimated based on \code{N} simulations with
 sector drawings specified by \code{random.numbers} (see \code{\link{init}}).
 The sector names (column names) should not include any white spaces. In case of a
 CreditMetrics type model, the values of R (not R^2) have to be provided as sector
-weights. In the standard CreditMetrics or CreditRisk+ framework a counterparty can 
+weights. In the standard CreditMetrics or CreditRisk+ framework a counterparty can
 be assigned to more than one sector. Within a analytical CreditRisk+ model, the
 sector names have to match the names of \code{sec.var} or in a simulative model
 the column names of \code{random.numbers} (see \code{\link{init}})
@@ -60,7 +60,7 @@ the column names of \code{random.numbers} (see \code{\link{init}})
 alpha = "missing")}}{
 If loss levels \code{alpha} are not provided, risk measures such as economic
 capital, value at risk and expected shortfall are not calculated by default.
-However, they can be calculated afterwards by calling the corresponding methods 
+However, they can be calculated afterwards by calling the corresponding methods
 (see \code{\link{VaR}}, \code{\link{ES}}, \code{\link{EC}})
 }
 
@@ -73,7 +73,7 @@ corresponding methods.
 }
 }}
 \references{
-Morgan, J. P. "CreditMetrics-technical document." JP Morgan, New York, 1997\cr 
+Morgan, J. P. "CreditMetrics-technical document." JP Morgan, New York, 1997\cr
 First Boston Financial Products, "CreditRisk+", 1997 \cr
 Gundlach & Lehrbass, "CreditRisk+ in the Banking Industry", Springer, 2003\cr
 }
@@ -85,7 +85,7 @@ Gundlach & Lehrbass, "CreditRisk+ in the Banking Industry", Springer, 2003\cr
 NC=100
 #assign business lines and countries randomly
 business.lines=c("A","B","C")
-CP.business=business.lines[ceiling(runif(NC,0,length(business.lines)))] 
+CP.business=business.lines[ceiling(runif(NC,0,length(business.lines)))]
 countries=c("A","B","C","D","E")
 CP.country=countries[ceiling(runif(NC,0,length(countries)))]
 
@@ -93,7 +93,7 @@ CP.country=countries[ceiling(runif(NC,0,length(countries)))]
 #according to business lines
 NS=length(business.lines)
 W=matrix(0,nrow = NC,ncol = length(business.lines),
-dimnames = list(1:NC,business.lines)) 
+dimnames = list(1:NC,business.lines))
 for(i in 1:NC){W[i,CP.business[i]]=1}
 
 #create portfolio data frame
@@ -125,7 +125,7 @@ plot(TestModel,1e6,alpha=alpha)
 VaR=VaR(TestModel,alpha)
 ES=ES(TestModel,alpha)
 
-#Calculate risk contributions to VaR and ES 
+#Calculate risk contributions to VaR and ES
 risk.cont=cbind(VaR.cont(TestModel,alpha = alpha),
 ES.cont(TestModel,alpha = alpha))
 

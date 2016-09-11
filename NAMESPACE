@@ -47,5 +47,5 @@ exportMethods(
   "ES.cont"
   )
 exportClasses("GCPM")
-import(methods, RcppProgress,parallel)
+import(methods, RcppProgress,parallel,utils,graphics,stats)
 importFrom(Rcpp, evalCpp)

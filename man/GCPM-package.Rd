@@ -20,15 +20,15 @@ model sensitivities.
 \tabular{ll}{
 Package: \tab GCPM\cr
 Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2015-06-26\cr
+Version: \tab 1.2.1\cr
+Date: \tab 2016-09-09\cr
 License: \tab GPL-2\cr
 }
 }
 \author{
 Kevin Jakob
 
-Maintainer: Kevin Jakob <Kevin.Jakob@Student.uni-augsburg.de>
+Maintainer: Kevin Jakob <Kevin.Jakob.Research@gmail.com>
 }
 \references{
 Morgan, J. P. "CreditMetrics-technical document." JP Morgan, New York, 1997\cr 
