@@ -20,8 +20,8 @@ model sensitivities.
 \tabular{ll}{
 Package: \tab GCPM\cr
 Type: \tab Package\cr
-Version: \tab 1.2.1\cr
-Date: \tab 2016-09-09\cr
+Version: \tab 1.2.2\cr
+Date: \tab 2016-12-29\cr
 License: \tab GPL-2\cr
 }
 }
@@ -31,6 +31,7 @@ Kevin Jakob
 Maintainer: Kevin Jakob <Kevin.Jakob.Research@gmail.com>
 }
 \references{
+Jakob, K. & Fischer, M. "GCPM: A flexible package to explore credit portfolio risk" Austrian Journal of Statistics 45.1 (2016): 25:44\cr
 Morgan, J. P. "CreditMetrics-technical document." JP Morgan, New York, 1997\cr 
 First Boston Financial Products, "CreditRisk+", 1997 \cr
 Gundlach & Lehrbass, "CreditRisk+ in the Banking Industry", Springer, 2003\cr

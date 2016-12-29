@@ -108,6 +108,7 @@ Objects can be created via the \code{init} function (see \code{\link{init}})
   }
 }
 \references{
+Jakob, K. & Fischer, M. "GCPM: A flexible package to explore credit portfolio risk" Austrian Journal of Statistics 45.1 (2016): 25:44\cr
 Morgan, J. P. "CreditMetrics-technical document." JP Morgan, New York, 1997\cr 
 First Boston Financial Products, "CreditRisk+", 1997 \cr
 Gundlach & Lehrbass, "CreditRisk+ in the Banking Industry", Springer, 2003\cr
